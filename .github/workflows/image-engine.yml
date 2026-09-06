@@ -1,0 +1,41 @@
+name: CodeFlare Image Engine
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "original/**"
+      - "resize-images.mjs"
+      - "package.json"
+      - ".github/workflows/image-engine.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  resize:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate responsive images
+        run: node resize-images.mjs
+
+      - name: Commit generated images
+        run: |
+          git config user.name "codeflare-image-engine"
+          git config user.email "actions@github.com"
+          git add s256 s320 s640 s800
+          git diff --cached --quiet || git commit -m "Generate responsive images"
+          git push
